@@ -16,7 +16,7 @@ le =load('../models/le.joblib')
 
 
 model = PytorchMultiClass(6)
-PATH = "../models/beeroracle_final_nosoftmax.pt"
+PATH = "../models/beeroracle_final_normal.pt"
 model.load_state_dict(torch.load(PATH))
 model.eval()
 
@@ -64,7 +64,7 @@ def predict(review_aroma:int, review_appearance: int, review_palate: int, review
     obs.rename( columns={'Brewery id' :'id_new'}, inplace=True )
     obs['id_new']=ce_target.transform(obs['id_new'])
     obs = torch.Tensor(sc.transform(obs))
-    pred = torch.log_softmax(model(obs), dim=1).argmax(1)
+    pred = model(obs).argmax(1)
     pred = le.inverse_transform(np.array(pred))
     return JSONResponse(pred.tolist())
 
@@ -90,7 +90,7 @@ def predict_multiple(review_aroma:List[int] = Query(...), review_appearance:List
                  'id_new':features['Brewery id']})
     obs['id_new']=ce_target.transform(obs['id_new'])
     obs = torch.Tensor(sc.transform(obs))
-    pred = torch.log_softmax(model(obs), dim=1).argmax(1)
+    pred = model(obs).argmax(1)
     pred = le.inverse_transform(np.array(pred))
     return JSONResponse(pred.tolist())
     
